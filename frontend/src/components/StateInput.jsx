@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { PRESETS, shuffleFromGoal } from '../puzzle.js'
 
+// Display the blank as an empty field and keep every other value as an editable string.
 const toCells = (state) => state.map((v) => (v === 0 ? '' : String(v)))
 
 export default function StateInput({ cells, onCellsChange, onSolve, error, busy }) {
   const [shuffleSteps, setShuffleSteps] = useState(20)
 
   const setCell = (i, value) => {
+    // Copy the array before changing one cell so React receives a new state value.
     const next = cells.slice()
     next[i] = value.replace(/[^0-8]/g, '').slice(-1)
     onCellsChange(next)
@@ -37,7 +39,7 @@ export default function StateInput({ cells, onCellsChange, onSolve, error, busy 
 
       <div className="shuffle-row">
         <label htmlFor="shuffle-steps">
-          Shuffle depth <strong>{shuffleSteps}</strong>
+          Shuffle moves <strong>{shuffleSteps}</strong>
         </label>
         <input
           id="shuffle-steps"
@@ -51,6 +53,7 @@ export default function StateInput({ cells, onCellsChange, onSolve, error, busy 
         <button
           type="button"
           className="btn"
+          // Shuffling from the goal produces a starting board that can be solved.
           onClick={() => onCellsChange(toCells(shuffleFromGoal(shuffleSteps)))}
           disabled={busy}
         >
@@ -59,7 +62,7 @@ export default function StateInput({ cells, onCellsChange, onSolve, error, busy 
       </div>
 
       <div className="preset-row">
-        <span className="hint">Presets:</span>
+        <span className="hint">Presets</span>
         {PRESETS.map((p) => (
           <button
             key={p.label}

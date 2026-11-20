@@ -6,6 +6,7 @@ export default function StepList({ path, labels, current, onSelect }) {
   const listRef = useRef(null)
 
   useEffect(() => {
+    // Keep the active thumbnail in view when playback advances past the visible part of the strip.
     const el = listRef.current?.querySelector('[aria-current="step"]')
     el?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' })
   }, [current])

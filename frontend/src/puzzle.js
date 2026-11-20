@@ -36,6 +36,7 @@ export function shuffleFromGoal(steps) {
   let state = GOAL.slice()
   let last = null
   for (let k = 0; k < steps; k++) {
+    // Skip the reverse of the last move so a shuffle does not immediately undo its previous step.
     const options = Object.keys(DIRS).filter(
       (d) => d !== OPPOSITE[last] && moveBlank(state, d),
     )
@@ -58,6 +59,7 @@ export function validateCells(cells) {
   if (nums.some((n) => !Number.isInteger(n) || n < 0 || n > 8)) {
     return { error: 'Use the numbers 1–8, and 0 or an empty cell for the blank.' }
   }
+  // Nine distinct values in the range 0–8 guarantee that every tile and the blank appear once.
   const seen = new Set(nums)
   if (seen.size !== 9) {
     const dupes = [...new Set(nums.filter((n, i) => nums.indexOf(n) !== i))]
@@ -70,5 +72,6 @@ export function validateCells(cells) {
 export function describeStep(prev, cur, blankDir) {
   if (!prev) return 'Start state'
   const tile = prev[cur.indexOf(0)]
+  // A tile slides opposite the direction reported for the blank.
   return `Tile ${tile} slides ${OPPOSITE[blankDir]}`
 }
