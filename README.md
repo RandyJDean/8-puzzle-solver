@@ -12,27 +12,28 @@ GitHub repository: <!-- TODO: paste the repo link here and in the report -->
 
 ## How the app talks to the solver
 
-`backend/app.py` imports `solver.py` and calls one function:
+`backend/app.py` imports `backend/solver.py` and calls our `A_Star` function:
 
 ```python
-solve(start: list[int]) -> list[list[int]] | None
+A_Star(start) -> list of boards | None
 ```
 
-- A **state** is a flat list of 9 ints, row by row, with `0` as the blank.
-  Example: `[1, 2, 3, 4, 5, 6, 7, 0, 8]` is
+- A **board** is a 3×3 grid (a list of 3 rows) with `0` as the blank, e.g.
+  `[[1, 2, 3], [4, 5, 6], [7, 8, 0]]` is
 
   ```
   1 2 3
   4 5 6
-  7 _ 8
+  7 8 _
   ```
-- The goal is always `[1, 2, 3, 4, 5, 6, 7, 8, 0]`.
-- Return the path from `start` to the goal, **including both the start and the goal**. If `start` is already the goal, return `[start]`.
-- Return `None` if the puzzle can't be solved.
+- The goal is always `[[1, 2, 3], [4, 5, 6], [7, 8, 0]]`.
+- `A_Star` returns the path from `start` to the goal, **including both the start and the goal** (just `[start]` if it is already solved), or `None` if the puzzle can't be solved.
 - Optional: return a dict to show search stats in the UI:
   `{"path": [...], "nodes_expanded": 1234}`
 
-The API checks the returned path: it must begin at `start`, end at the goal, and every step must slide the blank by one cell. If it doesn't, the app shows the step that broke. Until `solver.py` exists, the app runs and shows a "solver not available" banner.
+The front end sends flat lists of 9 numbers; `app.py` turns them into 3×3 grids before calling `A_Star` and flattens the boards it returns. It also checks the path: it must begin at `start`, end at the goal, and every step must slide the blank by one cell. If not, the app shows which step broke.
+
+**Keep `solver.py` importable.** Any code that asks for `input()` or prints a test run must sit under `if __name__ == "__main__":` at the bottom of `solver.py`. Otherwise it runs when the app imports the file and would freeze the server, so the app refuses to load it and shows a banner explaining this. You can still test the solver on its own with `python backend/solver.py`.
 
 ## Running it
 
@@ -74,7 +75,7 @@ Open http://localhost:5173.
 
 ## Tests
 
-The API tests use a fake solver that returns a hard-coded path. They don't depend on, or contain, our A* code.
+`test_api.py` uses a fake solver that returns a hard-coded path, so it doesn't depend on, or contain, our A* code. `test_real_solver.py` sends a few boards (including a 31-move one) through the app to our real `solver.py` and checks the solution lengths; it is skipped while `solver.py` can't be imported.
 
 ```bash
 python -m pytest backend/tests
@@ -86,7 +87,7 @@ python -m pytest backend/tests
 backend/
   app.py            Flask API (visualization glue)
   solver.py         A* solver (written by our group)
-  tests/test_api.py API tests
+  tests/            API tests and real-solver checks
 frontend/
   src/App.jsx       page layout and state
   src/api.js        calls to the Flask API
